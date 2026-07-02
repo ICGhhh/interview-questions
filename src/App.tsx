@@ -49,24 +49,10 @@ export default function App() {
     fontLink.href = "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap";
     document.head.appendChild(fontLink);
 
-    // 3. KaTeX CSS
-    const katexCss = document.createElement("link");
-    katexCss.rel = "stylesheet";
-    katexCss.href = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css";
-    document.head.appendChild(katexCss);
-
-    // 4. KaTeX JS Script
-    const katexJs = document.createElement("script");
-    katexJs.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js";
-    katexJs.defer = true;
-    document.body.appendChild(katexJs);
-
     return () => {
       document.head.removeChild(pc1);
       document.head.removeChild(pc2);
       document.head.removeChild(fontLink);
-      document.head.removeChild(katexCss);
-      document.body.removeChild(katexJs);
     };
   }, []);
 

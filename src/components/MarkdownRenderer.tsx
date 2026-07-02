@@ -1,17 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-
-// Add global type for KaTeX
-declare global {
-  interface Window {
-    katex?: {
-      render: (
-        math: string,
-        element: HTMLElement,
-        options?: { throwOnError?: boolean; displayMode?: boolean }
-      ) => void;
-    };
-  }
-}
+import React, { useEffect, useRef } from "react";
+import katex from "katex";
+import "katex/dist/katex.min.css";
 
 interface MathBlockProps {
   math: string;
@@ -20,43 +9,23 @@ interface MathBlockProps {
 
 const MathBlock: React.FC<MathBlockProps> = ({ math, block }) => {
   const containerRef = useRef<HTMLSpanElement>(null);
-  const [katexLoaded, setKatexLoaded] = useState(!!window.katex);
-
-  useEffect(() => {
-    // Poll to see if KaTeX has loaded asynchronously from CDN
-    let intervalId: number;
-    if (!window.katex) {
-      intervalId = window.setInterval(() => {
-        if (window.katex) {
-          setKatexLoaded(true);
-          window.clearInterval(intervalId);
-        }
-      }, 200);
-    }
-    return () => {
-      if (intervalId) window.clearInterval(intervalId);
-    };
-  }, []);
 
   useEffect(() => {
     if (containerRef.current) {
-      if (katexLoaded && window.katex) {
-        try {
-          window.katex.render(math, containerRef.current, {
-            throwOnError: false,
-            displayMode: block,
-          });
-          return;
-        } catch (e) {
-          console.error("KaTeX rendering error", e);
-        }
+      try {
+        katex.render(math, containerRef.current, {
+          throwOnError: false,
+          displayMode: block,
+        });
+      } catch (e) {
+        console.error("KaTeX rendering error", e);
+        // Fallback if KaTeX failed
+        containerRef.current.innerHTML = block
+          ? `<div class="font-serif italic text-center py-2 text-primary/80 overflow-x-auto whitespace-nowrap bg-muted/30 rounded p-3 my-2 border border-border/50">${math}</div>`
+          : `<code class="font-serif italic px-1 text-primary/90">${math}</code>`;
       }
-      // Fallback if KaTeX is unavailable or failed
-      containerRef.current.innerHTML = block
-        ? `<div class="font-serif italic text-center py-2 text-primary/80 overflow-x-auto whitespace-nowrap bg-muted/30 rounded p-3 my-2 border border-border/50">${math}</div>`
-        : `<code class="font-serif italic px-1 text-primary/90">${math}</code>`;
     }
-  }, [math, block, katexLoaded]);
+  }, [math, block]);
 
   return <span ref={containerRef} className={block ? "block w-full overflow-x-auto" : "inline-block"} />;
 };
